@@ -20,6 +20,12 @@ export class EmpleadoController {
     return this.empleadoService.create(createEmpleadoDto);
   }
 
+  @Post('multiple')
+  createMany(): Empleado[] {
+    // TODO
+    return [];
+  }
+
   @Get()
   findAll(): Empleado[] {
     return this.empleadoService.findAll();
@@ -28,6 +34,12 @@ export class EmpleadoController {
   @Get(':id')
   findOne(@Param('id') id: string): Empleado {
     return this.empleadoService.findOne(+id);
+  }
+
+  @Post('filter')
+  findSome(): Empleado[] {
+    // TODO
+    return [];
   }
 
   @Put(':id')
