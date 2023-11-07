@@ -2,10 +2,10 @@ import { Centros } from 'src/centros.enum';
 
 export class Empleado {
   id: number;
-  nombre: string;
-  apellidos: string;
-  centro: Centros;
-  BU: string;
+  name: string;
+  surname: string;
+  center: Centros;
+  bu: string;
   skills?: string[];
-  proyecto_actual?: string;
+  project?: string;
 }

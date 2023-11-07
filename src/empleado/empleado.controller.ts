@@ -6,10 +6,13 @@ import {
   Param,
   Delete,
   Put,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { EmpleadoService } from './empleado.service';
 import { CreateEmpleadoDto } from './dto/create-empleado.dto';
 import { Empleado } from './entities/empleado.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('empleado')
 export class EmpleadoController {
@@ -20,10 +23,15 @@ export class EmpleadoController {
     return this.empleadoService.create(createEmpleadoDto);
   }
 
-  @Post('multiple')
-  createMany(): Empleado[] {
-    // TODO
-    return [];
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async createMany(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<Empleado[]> {
+    const csvData = file.buffer.toString();
+    const empleados = this.empleadoService.parseCsv(csvData);
+    // console.table(empleados);
+    return empleados;
   }
 
   @Get()

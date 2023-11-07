@@ -4,22 +4,22 @@ import { Centros } from 'src/centros.enum';
 export class CreateEmpleadoDto {
   @IsNotEmpty()
   @IsString()
-  nombre: string;
+  name: string;
 
   @IsNotEmpty()
   @IsString()
-  apellidos: string;
+  surname: string;
 
   @IsEnum(Centros)
-  centro: Centros;
+  center: Centros;
 
   @IsNotEmpty()
   @IsString()
-  BU: string;
+  bu: string;
 
   @IsOptional()
   skills: string[];
 
   @IsOptional()
-  proyecto_actual: string;
+  project: string;
 }

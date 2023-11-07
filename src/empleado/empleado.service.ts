@@ -16,6 +16,33 @@ export class EmpleadoService {
     return empleado;
   }
 
+  parseCsv(csvData: string): Empleado[] {
+    const [fields, ...data] = csvData.split('\n');
+    const fieldsName: string[] = fields.split(',');
+    const fieldsData: any[][] = data.map((row) => row.split(','));
+
+    // TODO: last element from csv is [ '' ], and it is parsed wrong, need to check and avoid parsing
+    // last.length = 1
+    // last[0].length = 0
+    // basicamente quitarlo del array con un splice() o pop()...
+    const last = fieldsData[fieldsData.length - 1];
+    console.log(last.length, !last.length);
+
+    const empleados: { [key: string]: any }[] = [];
+
+    fieldsData.forEach((row) => {
+      const empleado: { [key: string]: any } = fieldsName.reduce(
+        (acc, key, index) => {
+          acc[key] = row[index];
+          return acc;
+        },
+        {},
+      );
+      empleados.push(empleado);
+    });
+    return empleados as Empleado[];
+  }
+
   findAll(): Empleado[] {
     return this.empleados;
   }
@@ -33,12 +60,12 @@ export class EmpleadoService {
     if (index !== -1) {
       this.empleados[index] = {
         id: this.empleados[index].id,
-        nombre: createEmpleadoDto.nombre,
-        apellidos: createEmpleadoDto.apellidos,
-        centro: createEmpleadoDto.centro,
-        BU: createEmpleadoDto.BU,
+        name: createEmpleadoDto.name,
+        surname: createEmpleadoDto.surname,
+        center: createEmpleadoDto.center,
+        bu: createEmpleadoDto.bu,
         skills: createEmpleadoDto.skills,
-        proyecto_actual: createEmpleadoDto.proyecto_actual,
+        project: createEmpleadoDto.project,
       };
       return this.empleados[index];
     } else {
