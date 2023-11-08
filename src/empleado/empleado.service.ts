@@ -9,7 +9,7 @@ export class EmpleadoService {
   create(createEmpleadoDto: CreateEmpleadoDto): Empleado {
     let id = 0;
     if (this.empleados && this.empleados.length) {
-      id = this.empleados.length;
+      id = this.empleados[this.empleados.length - 1].id + 1;
     }
     const empleado: Empleado = { id, ...createEmpleadoDto };
     this.empleados.push(empleado);
@@ -17,8 +17,9 @@ export class EmpleadoService {
   }
 
   parseCsv(csvData: string): Empleado[] {
-    const [fields, ...data] = csvData.split('\n');
-    const fieldsName: string[] = fields.split(',');
+    const data = csvData.split('\n').splice(1, csvData.split('\n').length - 1);
+    console.log(data);
+
     const fieldsData: any[][] = data.map((row) => row.split(','));
 
     const last = fieldsData[fieldsData.length - 1];
@@ -26,19 +27,22 @@ export class EmpleadoService {
       fieldsData.pop();
     }
 
-    const empleados: { [key: string]: any }[] = [];
+    const empleadosCSV: Empleado[] = [];
 
     fieldsData.forEach((row) => {
-      const empleado: { [key: string]: any } = fieldsName.reduce(
-        (acc, key, index) => {
-          acc[key] = row[index];
-          return acc;
-        },
-        {},
-      );
-      empleados.push(empleado);
+      const newEmpleado: Empleado = {
+        id: Number(row[0]),
+        name: row[1],
+        surname: row[2],
+        center: row[3],
+        bu: row[4],
+        skills: row[5].split(' '),
+        project: row[6],
+      };
+      empleadosCSV.push(newEmpleado);
     });
-    return empleados as Empleado[];
+    this.empleados.push(...empleadosCSV);
+    return empleadosCSV;
   }
 
   findAll(): Empleado[] {
