@@ -1,4 +1,4 @@
-import { Centros } from 'src/centros.enum';
+import { Centros } from '../../centros.enum';
 
 export class FilterEmpleadoDto {
   center?: Centros;
