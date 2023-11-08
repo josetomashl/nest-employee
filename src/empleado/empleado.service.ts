@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEmpleadoDto } from './dto/create-empleado.dto';
 import { Empleado } from './entities/empleado.entity';
+import { FilterEmpleadoDto } from './dto/filter-empleado.dto';
 
 @Injectable()
 export class EmpleadoService {
@@ -18,8 +19,6 @@ export class EmpleadoService {
 
   parseCsv(csvData: string): Empleado[] {
     const data = csvData.split('\n').splice(1, csvData.split('\n').length - 1);
-    console.log(data);
-
     const fieldsData: any[][] = data.map((row) => row.split(','));
 
     const last = fieldsData[fieldsData.length - 1];
@@ -55,6 +54,35 @@ export class EmpleadoService {
     );
     if (!empleado) throw new NotFoundException();
     return empleado;
+  }
+
+  findSome(filters: FilterEmpleadoDto): Empleado[] {
+    let someEmpleados = this.empleados;
+    if (filters.bu) {
+      someEmpleados = someEmpleados.filter((emp) => emp.bu === filters.bu);
+    }
+    if (filters.center) {
+      someEmpleados = someEmpleados.filter(
+        (emp) => emp.center === filters.center,
+      );
+    }
+    if (filters.project) {
+      someEmpleados = someEmpleados.filter(
+        (emp) => emp.project === filters.project,
+      );
+    }
+    if (filters.skills) {
+      const filteredSkills: string[] = [];
+      if (typeof filters.skills === 'string') {
+        filteredSkills.push(filters.skills);
+      } else {
+        filteredSkills.push(...filters.skills);
+      }
+      someEmpleados = someEmpleados.filter((emp) => {
+        return filteredSkills.every((skill) => emp.skills.includes(skill));
+      });
+    }
+    return someEmpleados;
   }
 
   update(id: number, createEmpleadoDto: CreateEmpleadoDto): Empleado {

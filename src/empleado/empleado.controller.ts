@@ -8,11 +8,13 @@ import {
   Put,
   UseInterceptors,
   UploadedFile,
+  Query,
 } from '@nestjs/common';
 import { EmpleadoService } from './empleado.service';
 import { CreateEmpleadoDto } from './dto/create-empleado.dto';
 import { Empleado } from './entities/empleado.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { FilterEmpleadoDto } from './dto/filter-empleado.dto';
 
 @Controller('empleado')
 export class EmpleadoController {
@@ -34,19 +36,19 @@ export class EmpleadoController {
   }
 
   @Get()
-  findAll(): Empleado[] {
-    return this.empleadoService.findAll();
+  findAll(@Query() filters: FilterEmpleadoDto): Empleado[] {
+    let empleados: Empleado[] = [];
+    if (!filters) {
+      empleados = this.empleadoService.findAll();
+    } else {
+      empleados = this.empleadoService.findSome(filters);
+    }
+    return empleados;
   }
 
   @Get(':id')
   findOne(@Param('id') id: string): Empleado {
     return this.empleadoService.findOne(+id);
-  }
-
-  @Post('filter')
-  findSome(): Empleado[] {
-    // TODO
-    return [];
   }
 
   @Put(':id')
