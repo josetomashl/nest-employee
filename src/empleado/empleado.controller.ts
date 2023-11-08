@@ -30,7 +30,6 @@ export class EmpleadoController {
   ): Promise<Empleado[]> {
     const csvData = file.buffer.toString();
     const empleados = this.empleadoService.parseCsv(csvData);
-    // console.table(empleados);
     return empleados;
   }
 

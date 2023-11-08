@@ -21,12 +21,10 @@ export class EmpleadoService {
     const fieldsName: string[] = fields.split(',');
     const fieldsData: any[][] = data.map((row) => row.split(','));
 
-    // TODO: last element from csv is [ '' ], and it is parsed wrong, need to check and avoid parsing
-    // last.length = 1
-    // last[0].length = 0
-    // basicamente quitarlo del array con un splice() o pop()...
     const last = fieldsData[fieldsData.length - 1];
-    console.log(last.length, !last.length);
+    if (!last || !last.length || !last[0] || !last[0].length) {
+      fieldsData.pop();
+    }
 
     const empleados: { [key: string]: any }[] = [];
 
