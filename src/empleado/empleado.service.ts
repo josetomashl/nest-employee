@@ -17,7 +17,7 @@ export class EmpleadoService {
     return empleado;
   }
 
-  parseCsv(csvData: string): Empleado[] {
+  createMany(csvData: string): Empleado[] {
     const data = csvData.split('\n').splice(1, csvData.split('\n').length - 1);
     const fieldsData: any[][] = data.map((row) => row.split(','));
 

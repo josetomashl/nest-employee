@@ -31,12 +31,12 @@ export class EmpleadoController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<Empleado[]> {
     const csvData = file.buffer.toString();
-    const empleados = this.empleadoService.parseCsv(csvData);
+    const empleados = this.empleadoService.createMany(csvData);
     return empleados;
   }
 
   @Get()
-  findAll(@Query() filters: FilterEmpleadoDto): Empleado[] {
+  findAll(@Query() filters?: FilterEmpleadoDto): Empleado[] {
     let empleados: Empleado[] = [];
     if (!filters) {
       empleados = this.empleadoService.findAll();
@@ -47,20 +47,23 @@ export class EmpleadoController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Empleado {
-    return this.empleadoService.findOne(+id);
+  findOne(@Param('id') id: number): Empleado {
+    if (!id || typeof id !== 'number') throw new Error('Invalid argument');
+    return this.empleadoService.findOne(id);
   }
 
   @Put(':id')
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() createEmpleadoDto: CreateEmpleadoDto,
   ): Empleado {
-    return this.empleadoService.update(+id, createEmpleadoDto);
+    if (!id || typeof id !== 'number') throw new Error('Invalid argument');
+    return this.empleadoService.update(id, createEmpleadoDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): void {
-    return this.empleadoService.remove(+id);
+  remove(@Param('id') id: number): void {
+    if (!id || typeof id !== 'number') throw new Error('Invalid argument');
+    return this.empleadoService.remove(id);
   }
 }
