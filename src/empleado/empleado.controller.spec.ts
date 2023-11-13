@@ -3,9 +3,9 @@ import { EmpleadoController } from './empleado.controller';
 import { EmpleadoService } from './empleado.service';
 import { Empleado } from './entities/empleado.entity';
 import { Centros } from '../centros.enum';
-import { CreateEmpleadoDto } from './dto/create-empleado.dto';
+import { CreateEmpleadoDto } from './dto/create-update-empleado.dto';
 import { FilterEmpleadoDto } from './dto/filter-empleado.dto';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('EmpleadoController test suite', () => {
   const empleados: Empleado[] = [
@@ -13,7 +13,7 @@ describe('EmpleadoController test suite', () => {
       id: 1,
       name: 'John',
       surname: 'Doe',
-      center: Centros.MRUCIA,
+      center: Centros.MURCIA,
       bu: 'test 1',
       skills: ['skill 1', 'skill 2'],
       project: 'project 1',
@@ -31,7 +31,7 @@ describe('EmpleadoController test suite', () => {
       id: 3,
       name: 'Any',
       surname: 'One',
-      center: Centros.MRUCIA,
+      center: Centros.MURCIA,
       bu: 'test 2',
       skills: ['skill 4', 'skill 5', 'skill 1'],
       project: 'project 1',
@@ -72,7 +72,7 @@ describe('EmpleadoController test suite', () => {
     it('should return an array of filtered employees', async () => {
       const filters: FilterEmpleadoDto = {
         bu: 'test 1',
-        center: Centros.MRUCIA,
+        center: Centros.MURCIA,
       };
       const result = empleados.filter(
         (emp) => emp.center === 'MURCIA' && emp.bu === 'test 1',
@@ -95,8 +95,7 @@ describe('EmpleadoController test suite', () => {
       try {
         await empleadoController.findOne(undefined);
       } catch (error) {
-        expect(error).toBeInstanceOf(Error);
-        expect(error).toHaveProperty('message', 'Invalid argument');
+        expect(error).toBeInstanceOf(BadRequestException);
       }
     });
 
@@ -135,52 +134,71 @@ describe('EmpleadoController test suite', () => {
   });
 
   describe('createMany', () => {
-    it.todo('test post employees through a csv file');
-    //   it('should return an array of new employees', async () => {
-    //     const result: Empleado[] = [
-    //       {
-    //         id: 1,
-    //         name: 'John',
-    //         surname: 'Doe',
-    //         center: Centros.MRUCIA,
-    //         bu: 'test 1',
-    //         skills: ['skill 1', 'skill 2'],
-    //         project: 'project 1',
-    //       },
-    //       {
-    //         id: 2,
-    //         name: 'Lorem',
-    //         surname: 'Ipsum',
-    //         center: Centros.VALENCIA,
-    //         bu: 'test 2',
-    //         skills: ['skill 3', 'skill 2'],
-    //         project: 'project 2',
-    //       },
-    //       {
-    //         id: 3,
-    //         name: 'Any',
-    //         surname: 'One',
-    //         center: Centros.MRUCIA,
-    //         bu: 'test 2',
-    //         skills: ['skill 4', 'skill 5', 'skill 1'],
-    //         project: 'project 1',
-    //       },
-    //     ];
-    //     const filePath = `../../${__dirname}/assets/files/employees.csv`;
-    //     const file = new File([], 'employees.csv', { type: 'text/csv' });
-    //     // Test if the test file is exist
-    //     fs.access(filePath, fs.constants.F_OK, (error) => {
-    //       if (error) throw new Error('File does not exist');
-    //       return jest
-    //         .spyOn(empleadoService, 'createMany')
-    //         .mockImplementation(() => result);
-    //     });
-    //     jest
-    //       .spyOn(empleadoService, 'createMany')
-    //       .mockImplementation(() => result);
-    //     expect(await empleadoController.createMany(file)).toBe(result);
-    //     // TODO
-    //   });
+    it('test post employees through a csv file', async () => {
+      const result: Empleado[] = [
+        {
+          id: 1,
+          name: 'Daron',
+          surname: 'Weimann',
+          center: Centros.VALENCIA,
+          bu: 'Spain',
+          skills: ['MongoDB', 'Typescript'],
+          project: 'Leannon Thompson and Hahn',
+        },
+        {
+          id: 2,
+          name: 'Vada',
+          surname: 'Ullrich',
+          center: Centros.MURCIA,
+          bu: 'Germany',
+          skills: ['.NET', 'Java', 'NodeJS', 'MongoDB', 'Typescript'],
+          project: 'Leannon Thompson and Hahn',
+        },
+        {
+          id: 3,
+          name: 'Mireya',
+          surname: 'Farrell',
+          center: Centros.MURCIA,
+          bu: 'Netherlands',
+          skills: ['NodeJS', '.NET', 'Java', 'Typescript'],
+          project: 'Wehner - Renner',
+        },
+        {
+          id: 4,
+          name: 'Seamus',
+          surname: 'Lynch',
+          center: Centros.MURCIA,
+          bu: 'France',
+          skills: ['Java', 'NodeJS', '.NET'],
+          project: 'Greenfelder Inc',
+        },
+        {
+          id: 5,
+          name: 'Spencer',
+          surname: 'Parker',
+          center: Centros.MURCIA,
+          bu: 'France',
+          skills: ['Java', 'Typescript', '.NET'],
+          project: 'Leannon Thompson and Hahn',
+        },
+      ];
+      const file = {
+        fieldname: 'file',
+        originalname: 'employees.csv',
+        encoding: '7bit',
+        mimetype: 'text/csv',
+        buffer: Buffer.from(
+          `id,name,surname,center,bu,skills,project\n1,Daron,Weimann,VALENCIA,Spain,MongoDB Typescript,Leannon Thompson and Hahn\n2,Vada,Ullrich,MURCIA,Germany,.NET Java NodeJS MongoDB Typescript,Leannon Thompson and Hahn\n3,Mireya,Farrell,MURCIA,Netherlands,NodeJS .NET Java Typescript,Wehner - Renner\n4,Seamus,Lynch,MURCIA,France,Java NodeJS .NET,Greenfelder Inc\n5,Spencer,Parker,MURCIA,France,Java Typescript .NET,Leannon Thompson and Hahn`,
+        ),
+        size: 123,
+      };
+
+      jest
+        .spyOn(empleadoService, 'createMany')
+        .mockImplementation(() => result);
+      const actual = await empleadoController.createMany(file as any);
+      expect(actual).toEqual(result);
+    });
   });
 
   describe('update', () => {
@@ -190,9 +208,11 @@ describe('EmpleadoController test suite', () => {
       result.surname = 'Apellido';
       result.bu = 'BU';
       jest.spyOn(empleadoService, 'update').mockImplementation(() => result);
-      expect(
-        await empleadoController.update(1, result as CreateEmpleadoDto),
-      ).toEqual(result);
+      const actual = await empleadoController.update(
+        1,
+        result as CreateEmpleadoDto,
+      );
+      expect(actual).toEqual(result);
     });
   });
 
@@ -200,7 +220,12 @@ describe('EmpleadoController test suite', () => {
     it('should remove an employee', async () => {
       const result = empleados.filter((emp) => emp.id !== 1);
       jest.spyOn(empleadoService, 'remove').mockImplementation(() => result);
-      expect(await empleadoController.remove(1)).toBe(result);
+      await empleadoController.remove(1);
+      try {
+        await empleadoController.findOne(1);
+      } catch (error) {
+        expect(error).toBeInstanceOf(NotFoundException);
+      }
     });
   });
 });

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateEmpleadoDto } from './dto/create-empleado.dto';
+import { CreateEmpleadoDto } from './dto/create-update-empleado.dto';
 import { Empleado } from './entities/empleado.entity';
 import { FilterEmpleadoDto } from './dto/filter-empleado.dto';
 

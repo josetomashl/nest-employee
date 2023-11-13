@@ -1,4 +1,4 @@
 export enum Centros {
-  MRUCIA = 'MURCIA',
+  MURCIA = 'MURCIA',
   VALENCIA = 'VALENCIA',
 }
