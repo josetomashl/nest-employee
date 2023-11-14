@@ -61,7 +61,7 @@ describe('EmpleadoController test suite', () => {
     it('should return an array of employees', async () => {
       jest
         .spyOn(empleadoService, 'findAll')
-        .mockImplementation(() => empleados);
+        .mockImplementation(async () => empleados);
       const actual = await empleadoController.findAll();
       const result = empleados;
       expect(actual).toEqual(result);
@@ -77,34 +77,38 @@ describe('EmpleadoController test suite', () => {
       const result = empleados.filter(
         (emp) => emp.center === 'MURCIA' && emp.bu === 'test 1',
       );
-      jest.spyOn(empleadoService, 'findSome').mockImplementation(() => result);
+      jest
+        .spyOn(empleadoService, 'findSome')
+        .mockImplementation(async () => result);
       const actual = await empleadoController.findAll(filters);
-      expect(actual).toBe(result);
+      expect(actual).toEqual(result);
     });
   });
 
   describe('findOne', () => {
     it('should return an specific employee', async () => {
       const result = empleados.find((emp) => emp.id === 1);
-      jest.spyOn(empleadoService, 'findOne').mockImplementation(() => result);
+      jest
+        .spyOn(empleadoService, 'findOne')
+        .mockImplementation(async () => result);
       const actual = await empleadoController.findOne(1);
       expect(actual).toEqual(result);
     });
 
-    it('should return Bad Request Exception', async () => {
-      jest.spyOn(empleadoService, 'findOne').mockImplementation(() => {
+    it('should return BadRequestException', async () => {
+      jest.spyOn(empleadoService, 'findOne').mockImplementation(async () => {
         throw new BadRequestException();
       });
-      expect(() => empleadoController.findOne(undefined)).toThrow(
-        BadRequestException,
-      );
+      const actual = empleadoController.findOne(null);
+      expect(actual).rejects.toThrow(BadRequestException);
     });
 
-    it('should return not found exception', async () => {
-      jest.spyOn(empleadoService, 'findOne').mockImplementation(() => {
+    it('should return NotFoundException', async () => {
+      jest.spyOn(empleadoService, 'findOne').mockImplementation(async () => {
         throw new NotFoundException();
       });
-      expect(() => empleadoController.findOne(1)).toThrow(NotFoundException);
+      const actual = empleadoController.findOne(1);
+      expect(actual).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -119,7 +123,7 @@ describe('EmpleadoController test suite', () => {
         project: 'project 5',
       };
       const result: Empleado = {
-        id: 4,
+        id: 1,
         name: 'New',
         surname: 'Employee',
         center: Centros.VALENCIA,
@@ -127,8 +131,26 @@ describe('EmpleadoController test suite', () => {
         skills: [],
         project: 'project 5',
       };
-      jest.spyOn(empleadoService, 'create').mockImplementation(() => result);
+      jest
+        .spyOn(empleadoService, 'create')
+        .mockImplementation(async () => result);
       expect(await empleadoController.create(newEmpleado)).toEqual(result);
+    });
+
+    it('should return BadRequestException when missing fields', async () => {
+      const newEmpleado: CreateEmpleadoDto = {
+        name: 'New',
+        surname: '',
+        center: Centros.VALENCIA,
+        bu: 'test 5',
+        skills: [],
+        project: '',
+      };
+      jest.spyOn(empleadoService, 'create').mockImplementation(async () => {
+        throw new BadRequestException();
+      });
+      const actual = empleadoController.create(newEmpleado);
+      expect(actual).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -193,9 +215,17 @@ describe('EmpleadoController test suite', () => {
       };
       jest
         .spyOn(empleadoService, 'createMany')
-        .mockImplementation(() => result);
+        .mockImplementation(async () => result);
       const actual = await empleadoController.createMany(file as any);
       expect(actual).toEqual(result);
+    });
+
+    it('test post employees through a csv file', async () => {
+      jest.spyOn(empleadoService, 'createMany').mockImplementation(async () => {
+        throw new BadRequestException();
+      });
+      const actual = empleadoController.createMany({} as any);
+      expect(actual).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -205,31 +235,62 @@ describe('EmpleadoController test suite', () => {
       result.name = 'Nombre';
       result.surname = 'Apellido';
       result.bu = 'BU';
-      jest.spyOn(empleadoService, 'update').mockImplementation(() => result);
+      jest
+        .spyOn(empleadoService, 'update')
+        .mockImplementation(async () => result);
       const actual = await empleadoController.update(
         1,
         result as CreateEmpleadoDto,
       );
       expect(actual).toEqual(result);
     });
+
+    it('should return NotFoundException', async () => {
+      const result = empleados.find((emp) => emp.id === 1);
+      result.name = 'Nombre';
+      result.surname = 'Apellido';
+      result.bu = 'BU';
+      jest.spyOn(empleadoService, 'update').mockImplementation(async () => {
+        throw new NotFoundException();
+      });
+      const actual = empleadoController.update(1, result as CreateEmpleadoDto);
+      expect(actual).rejects.toThrow(NotFoundException);
+    });
+
+    it('should return BadRequestException', async () => {
+      jest.spyOn(empleadoService, 'update').mockImplementation(async () => {
+        throw new BadRequestException();
+      });
+      const actual = empleadoController.update(null, null);
+      expect(actual).rejects.toThrow(BadRequestException);
+    });
   });
 
   describe('remove', () => {
     it('should remove an employee', async () => {
-      // TODO
-      // const expected: Empleado[] = empleados.filter((emp) => emp.id !== 1);
-      // jest
-      //   .spyOn(empleadoController, 'findAll')
-      //   .mockImplementation(() => empleados);
-      // await empleadoController.remove(1);
-      // expect(await empleadoController.findAll()).toBe(expected);
+      const id = 1;
+      const expected = `Employee with ID #${id} deleted succesfully`;
+      jest
+        .spyOn(empleadoController, 'remove')
+        .mockImplementation(async () => expected);
+      const actual = await empleadoController.remove(id);
+      expect(actual).toBe(expected);
+    });
+
+    it('should return BadRequestException', async () => {
+      jest.spyOn(empleadoController, 'remove').mockImplementation(async () => {
+        throw new BadRequestException();
+      });
+      const actual = empleadoController.remove(null);
+      expect(actual).rejects.toThrow(BadRequestException);
     });
 
     it('should return NotFoundException', async () => {
-      jest.spyOn(empleadoController, 'remove').mockImplementation(() => {
+      jest.spyOn(empleadoController, 'remove').mockImplementation(async () => {
         throw new NotFoundException();
       });
-      expect(() => empleadoController.remove(1)).toThrow(NotFoundException);
+      const actual = empleadoController.remove(1);
+      expect(actual).rejects.toThrow(NotFoundException);
     });
   });
 });

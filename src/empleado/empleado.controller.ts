@@ -22,7 +22,9 @@ export class EmpleadoController {
   constructor(private readonly empleadoService: EmpleadoService) {}
 
   @Post()
-  create(@Body() createEmpleadoDto: CreateEmpleadoDto): Empleado {
+  async create(
+    @Body() createEmpleadoDto: CreateEmpleadoDto,
+  ): Promise<Empleado> {
     return this.empleadoService.create(createEmpleadoDto);
   }
 
@@ -39,34 +41,34 @@ export class EmpleadoController {
   }
 
   @Get()
-  findAll(@Query() filters?: FilterEmpleadoDto): Empleado[] {
+  async findAll(@Query() filters?: FilterEmpleadoDto): Promise<Empleado[]> {
     let empleados: Empleado[] = [];
     if (!filters) {
-      empleados = this.empleadoService.findAll();
+      empleados = await this.empleadoService.findAll();
     } else {
-      empleados = this.empleadoService.findSome(filters);
+      empleados = await this.empleadoService.findSome(filters);
     }
     return empleados;
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number): Empleado {
-    if (!id || typeof id !== 'number') throw new BadRequestException();
+  async findOne(@Param('id') id: number): Promise<Empleado> {
+    if (!id) throw new BadRequestException();
     return this.empleadoService.findOne(id);
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id') id: number,
     @Body() createEmpleadoDto: CreateEmpleadoDto,
-  ): Empleado {
-    if (!id || typeof id !== 'number') throw new BadRequestException();
+  ): Promise<Empleado> {
+    if (!id || !createEmpleadoDto) throw new BadRequestException();
     return this.empleadoService.update(id, createEmpleadoDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number): void {
-    if (!id || typeof id !== 'number') throw new BadRequestException();
+  async remove(@Param('id') id: number): Promise<string> {
+    if (!id) throw new BadRequestException();
     return this.empleadoService.remove(id);
   }
 }

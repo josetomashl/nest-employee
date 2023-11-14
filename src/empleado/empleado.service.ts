@@ -7,8 +7,8 @@ import { FilterEmpleadoDto } from './dto/filter-empleado.dto';
 export class EmpleadoService {
   private empleados: Empleado[] = [];
 
-  create(createEmpleadoDto: CreateEmpleadoDto): Empleado {
-    let id = 0;
+  async create(createEmpleadoDto: CreateEmpleadoDto): Promise<Empleado> {
+    let id = 1;
     if (this.empleados && this.empleados.length) {
       id = this.empleados[this.empleados.length - 1].id + 1;
     }
@@ -17,7 +17,7 @@ export class EmpleadoService {
     return empleado;
   }
 
-  createMany(csvData: string): Empleado[] {
+  async createMany(csvData: string): Promise<Empleado[]> {
     const data = csvData.split('\n').splice(1, csvData.split('\n').length - 1);
     const fieldsData: any[][] = data.map((row) => row.split(','));
 
@@ -44,19 +44,19 @@ export class EmpleadoService {
     return empleadosCSV;
   }
 
-  findAll(): Empleado[] {
+  async findAll(): Promise<Empleado[]> {
     return this.empleados;
   }
 
-  findOne(id: number): Empleado {
+  async findOne(id: number): Promise<Empleado> {
     const empleado: Empleado = this.empleados.find(
-      (empleado) => empleado.id === id,
+      (empleado) => empleado.id == id,
     );
     if (!empleado) throw new NotFoundException();
     return empleado;
   }
 
-  findSome(filters: FilterEmpleadoDto): Empleado[] {
+  async findSome(filters: FilterEmpleadoDto): Promise<Empleado[]> {
     let someEmpleados = this.empleados;
     if (filters.bu) {
       someEmpleados = someEmpleados.filter((emp) => emp.bu === filters.bu);
@@ -85,8 +85,11 @@ export class EmpleadoService {
     return someEmpleados;
   }
 
-  update(id: number, createEmpleadoDto: CreateEmpleadoDto): Empleado {
-    const index = this.empleados.findIndex((item) => item.id === id);
+  async update(
+    id: number,
+    createEmpleadoDto: CreateEmpleadoDto,
+  ): Promise<Empleado> {
+    const index = this.empleados.findIndex((item) => item.id == id);
     if (index !== -1) {
       this.empleados[index] = {
         id: this.empleados[index].id,
@@ -103,8 +106,13 @@ export class EmpleadoService {
     }
   }
 
-  remove(id: number): void {
-    this.findOne(id);
-    this.empleados = this.empleados.filter((emp) => emp.id !== id);
+  async remove(id: number): Promise<string> {
+    try {
+      await this.findOne(id);
+    } catch (error) {
+      throw error;
+    }
+    this.empleados = this.empleados.filter((emp) => emp.id != id);
+    return `Employee with ID #${id} deleted succesfully`;
   }
 }
