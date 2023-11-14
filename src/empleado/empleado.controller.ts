@@ -31,9 +31,8 @@ export class EmpleadoController {
   async createMany(
     @UploadedFile() file: Express.Multer.File,
   ): Promise<Empleado[]> {
-    console.log(file);
-
-    if (!file) throw new BadRequestException();
+    if (!file || file.mimetype !== 'text/csv')
+      throw new BadRequestException('Format not supported');
     const csvData = file.buffer.toString();
     const empleados = this.empleadoService.createMany(csvData);
     return empleados;

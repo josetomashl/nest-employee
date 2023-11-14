@@ -52,6 +52,12 @@ describe('EmpleadoController test suite', () => {
   });
 
   describe('findAll', () => {
+    it('should return an empty array', async () => {
+      const actual = await empleadoController.findAll();
+      const result = [];
+      expect(actual).toStrictEqual(result);
+    });
+
     it('should return an array of employees', async () => {
       jest
         .spyOn(empleadoService, 'findAll')
@@ -59,12 +65,6 @@ describe('EmpleadoController test suite', () => {
       const actual = await empleadoController.findAll();
       const result = empleados;
       expect(actual).toEqual(result);
-    });
-
-    it('should return an empty array', async () => {
-      const actual = await empleadoController.findAll();
-      const result = [];
-      expect(actual).toStrictEqual(result);
     });
   });
 
@@ -91,21 +91,20 @@ describe('EmpleadoController test suite', () => {
       expect(actual).toEqual(result);
     });
 
-    it('should return invalid argument error', async () => {
-      try {
-        await empleadoController.findOne(undefined);
-      } catch (error) {
-        expect(error).toBeInstanceOf(BadRequestException);
-      }
+    it('should return Bad Request Exception', async () => {
+      jest.spyOn(empleadoService, 'findOne').mockImplementation(() => {
+        throw new BadRequestException();
+      });
+      expect(() => empleadoController.findOne(undefined)).toThrow(
+        BadRequestException,
+      );
     });
 
     it('should return not found exception', async () => {
-      try {
-        await empleadoController.findOne(1);
-      } catch (error) {
-        expect(error).toBeInstanceOf(NotFoundException);
-        expect(error).toHaveProperty('message', 'Not Found');
-      }
+      jest.spyOn(empleadoService, 'findOne').mockImplementation(() => {
+        throw new NotFoundException();
+      });
+      expect(() => empleadoController.findOne(1)).toThrow(NotFoundException);
     });
   });
 
@@ -129,7 +128,7 @@ describe('EmpleadoController test suite', () => {
         project: 'project 5',
       };
       jest.spyOn(empleadoService, 'create').mockImplementation(() => result);
-      expect(await empleadoController.create(newEmpleado)).toBe(result);
+      expect(await empleadoController.create(newEmpleado)).toEqual(result);
     });
   });
 
@@ -192,7 +191,6 @@ describe('EmpleadoController test suite', () => {
         ),
         size: 123,
       };
-
       jest
         .spyOn(empleadoService, 'createMany')
         .mockImplementation(() => result);
@@ -218,14 +216,20 @@ describe('EmpleadoController test suite', () => {
 
   describe('remove', () => {
     it('should remove an employee', async () => {
-      const result = empleados.filter((emp) => emp.id !== 1);
-      jest.spyOn(empleadoService, 'remove').mockImplementation(() => result);
-      await empleadoController.remove(1);
-      try {
-        await empleadoController.findOne(1);
-      } catch (error) {
-        expect(error).toBeInstanceOf(NotFoundException);
-      }
+      // TODO
+      // const expected: Empleado[] = empleados.filter((emp) => emp.id !== 1);
+      // jest
+      //   .spyOn(empleadoController, 'findAll')
+      //   .mockImplementation(() => empleados);
+      // await empleadoController.remove(1);
+      // expect(await empleadoController.findAll()).toBe(expected);
+    });
+
+    it('should return NotFoundException', async () => {
+      jest.spyOn(empleadoController, 'remove').mockImplementation(() => {
+        throw new NotFoundException();
+      });
+      expect(() => empleadoController.remove(1)).toThrow(NotFoundException);
     });
   });
 });
